@@ -27,7 +27,11 @@ public class ConduitDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<User>(
-            entity => { entity.HasKey(user => user.Id); }
+            entity =>
+            {
+                entity.HasKey(user => user.Id);
+                entity.HasIndex(user => user.Email).IsUnique();
+            }
         );
         modelBuilder.Entity<Article>(
             entity =>
