@@ -9,6 +9,7 @@ public class UserProfile : Profile
     public UserProfile()
     {
         CreateMap<UserForUpsertDto, User>();
+        CreateMap<User, UserForUpsertDto>();
         CreateMap<User, UserToDisplayDto>()
             .ForMember(dest => dest.Name,
                 opt => opt.MapFrom(src => src.FullName))

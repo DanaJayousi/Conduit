@@ -41,6 +41,7 @@ public class UsersController : ControllerBase
         return CreatedAtAction(nameof(GetUserById), new { userId = storedUser.Id },
             _mapper.Map<UserToDisplayDto>(storedUser));
     }
+
     [HttpPut("{userId:int}")]
     public async Task<ActionResult<UserToDisplayDto>> UpdateUser(int userId,
         UserForUpsertDto userToUpdate)
@@ -52,6 +53,24 @@ public class UsersController : ControllerBase
         if (possibleEmailConflict != null && possibleEmailConflict.Id != userId)
             return Conflict();
         _mapper.Map(userToUpdate, userFromDb);
+        await _unitOfWork.Commit();
+        return NoContent();
+    }
+
+    [HttpPatch("{userId:int}")]
+    public async Task<ActionResult> PartiallyUpdateUser(int userId,
+        JsonPatchDocument<UserForUpsertDto> patchDocument)
+    {
+        var userFromDb = await _userRepository.GetAsync(userId);
+        if (userFromDb == null) return NotFound();
+        var userToPatch = _mapper.Map<UserForUpsertDto>(
+            userFromDb);
+        patchDocument.ApplyTo(userToPatch);
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        if (!TryValidateModel(userToPatch)) return BadRequest(ModelState);
+
+        _mapper.Map(userToPatch, userFromDb);
         await _unitOfWork.Commit();
         return NoContent();
     }

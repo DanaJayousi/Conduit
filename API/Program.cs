@@ -9,8 +9,9 @@ using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers().AddFluentValidation(c
-    => c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
+builder.Services.AddControllers()
+    .AddFluentValidation(c => c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()))
+    .AddNewtonsoftJson();
 builder.Services.AddDbContext<ConduitDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration["ConnectionStrings:ConduitConnection"],
         sqlServerOptionsAction => sqlServerOptionsAction.MigrationsAssembly("Infrastructure")));
