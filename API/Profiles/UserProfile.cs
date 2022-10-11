@@ -8,8 +8,7 @@ public class UserProfile : Profile
 {
     public UserProfile()
     {
-        CreateMap<UserForCreationDto, User>();
-        CreateMap<UserForUpdateDto, User>();
+        CreateMap<UserForUpsertDto, User>();
         CreateMap<User, UserToDisplayDto>()
             .ForMember(dest => dest.Name,
                 opt => opt.MapFrom(src => src.FullName))

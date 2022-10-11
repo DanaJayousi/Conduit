@@ -1,6 +1,6 @@
 ﻿namespace API.Models;
 
-public class UserForCreationDto
+public class UserForUpsertDto
 {
     public string Email { get; set; }
     public string Password { get; set; }

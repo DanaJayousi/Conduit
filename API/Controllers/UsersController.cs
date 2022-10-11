@@ -2,6 +2,7 @@ using API.Models;
 using AutoMapper;
 using Domain.Interfaces;
 using Domain.User;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -30,7 +31,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<UserToDisplayDto>> AddUser(UserForCreationDto user)
+    public async Task<ActionResult<UserToDisplayDto>> AddUser(UserForUpsertDto user)
     {
         if (await _userRepository.GetUserByEmailAsync(user.Email) != null)
             return Conflict();
@@ -42,15 +43,16 @@ public class UsersController : ControllerBase
     }
     [HttpPut("{userId:int}")]
     public async Task<ActionResult<UserToDisplayDto>> UpdateUser(int userId,
-        UserForUpdateDto userToUpdate)
+        UserForUpsertDto userToUpdate)
     {
         var userFromDb = await _userRepository.GetAsync(userId);
         if (userFromDb == null)
             return NotFound();
-        if (await _userRepository.GetUserByEmailAsync(userToUpdate.Email) != null)
+        var possibleEmailConflict = await _userRepository.GetUserByEmailAsync(userToUpdate.Email);
+        if (possibleEmailConflict != null && possibleEmailConflict.Id != userId)
             return Conflict();
-        var updatedUser = _mapper.Map(userToUpdate, userFromDb);
+        _mapper.Map(userToUpdate, userFromDb);
         await _unitOfWork.Commit();
-        return Ok(_mapper.Map<UserToDisplayDto>(updatedUser));
+        return NoContent();
     }
 }
