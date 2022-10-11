@@ -9,14 +9,6 @@ public class UserRepository : Repository<User>, IUserRepository
     {
     }
 
-    public override void Remove(User user)
-    {
-        var toDelete = Context.Set<UserToUser>()
-            .Where(toUser => toUser.FollowerId == user.Id || toUser.UserId == user.Id).ToList();
-        Context.RemoveRange(toDelete);
-        Context.Set<User>().Remove(user);
-    }
-
     public async Task FollowAsync(User user, User follower)
     {
         await Context.Set<UserToUser>().AddAsync(new UserToUser
