@@ -1,5 +1,4 @@
 ﻿using Domain.Interfaces;
-using Domain.UserToUser;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
@@ -27,8 +26,6 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
         await Context.Set<TEntity>().AddAsync(entity);
     }
-
-    
 
     public virtual void Remove(TEntity entity)
     {

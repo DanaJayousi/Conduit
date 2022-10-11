@@ -1,6 +1,5 @@
 using Domain.User;
 using Domain.UserToUser;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
@@ -17,6 +16,7 @@ public class UserRepository : Repository<User>, IUserRepository
         Context.RemoveRange(toDelete);
         Context.Set<User>().Remove(user);
     }
+
     public async Task FollowAsync(User user, User follower)
     {
         await Context.Set<UserToUser>().AddAsync(new UserToUser
