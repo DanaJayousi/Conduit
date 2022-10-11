@@ -32,6 +32,8 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserToDisplayDto>> AddUser(UserForCreationDto user)
     {
+        if (await _userRepository.GetUserByEmailAsync(user.Email) != null)
+            return Conflict();
         var storedUser = _mapper.Map<User>(user);
         await _userRepository.AddAsync(storedUser);
         await _unitOfWork.Commit();
