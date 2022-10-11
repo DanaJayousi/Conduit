@@ -21,7 +21,7 @@ public class UsersController : ControllerBase
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
-    [HttpGet("{userId}")]
+    [HttpGet("{userId:int}")]
     public async Task<ActionResult<UserToDisplayDto>> GetUserById(int userId)
     {
         var user = await _userRepository.GetAsync(userId);
@@ -39,5 +39,18 @@ public class UsersController : ControllerBase
         await _unitOfWork.Commit();
         return CreatedAtAction(nameof(GetUserById), new { userId = storedUser.Id },
             _mapper.Map<UserToDisplayDto>(storedUser));
+    }
+    [HttpPut("{userId:int}")]
+    public async Task<ActionResult<UserToDisplayDto>> UpdateUser(int userId,
+        UserForUpdateDto userToUpdate)
+    {
+        var userFromDb = await _userRepository.GetAsync(userId);
+        if (userFromDb == null)
+            return NotFound();
+        if (await _userRepository.GetUserByEmailAsync(userToUpdate.Email) != null)
+            return Conflict();
+        var updatedUser = _mapper.Map(userToUpdate, userFromDb);
+        await _unitOfWork.Commit();
+        return Ok(_mapper.Map<UserToDisplayDto>(updatedUser));
     }
 }
