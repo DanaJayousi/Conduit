@@ -67,9 +67,7 @@ public class UsersController : ControllerBase
             userFromDb);
         patchDocument.ApplyTo(userToPatch);
         if (!ModelState.IsValid) return BadRequest(ModelState);
-
         if (!TryValidateModel(userToPatch)) return BadRequest(ModelState);
-
         _mapper.Map(userToPatch, userFromDb);
         await _unitOfWork.Commit();
         return NoContent();
