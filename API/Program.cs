@@ -43,7 +43,7 @@ builder.Services.AddAuthentication("Bearer")
     );
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("UserOnly", policy => policy.RequireClaim("userId"));
+    options.AddPolicy("UsersOnly", policy => policy.RequireClaim("userId"));
 });
 var app = builder.Build();
 

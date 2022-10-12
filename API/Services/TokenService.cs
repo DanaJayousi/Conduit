@@ -18,7 +18,7 @@ public class TokenService : ITokenService
             audience,
             claims,
             DateTime.UtcNow,
-            DateTime.UtcNow.AddMinutes(5),
+            DateTime.UtcNow.AddMinutes(1),
             signingCredentials);
         return new JwtSecurityTokenHandler().WriteToken(accessToken);
     }
@@ -31,8 +31,25 @@ public class TokenService : ITokenService
         return Convert.ToBase64String(randomNumber);
     }
 
-    public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    public int GetUserIdFromAccessToken(string token, string secretKey)
     {
-        throw new NotImplementedException();
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            ValidateLifetime = false
+        };
+        var principal =
+            new JwtSecurityTokenHandler().ValidateToken(token, tokenValidationParameters, out var securityToken);
+
+        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                StringComparison.InvariantCultureIgnoreCase))
+            throw new SecurityTokenException("Invalid token");
+
+        var userId = principal.Claims.SingleOrDefault(claim => claim.Type == "userId")?.Value;
+        return userId == null ? 0 : int.Parse(userId);
     }
 }
