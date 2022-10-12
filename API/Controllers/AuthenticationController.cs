@@ -28,8 +28,8 @@ public class AuthenticationController : ControllerBase
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    [HttpPost]
-    public async Task<ActionResult<string>> Authenticate(
+    [HttpPost("signIn")]
+    public async Task<ActionResult<string>> SignIn(
         AuthenticationDto authenticationDto)
     {
         var user = await ValidateUserCredentialsAsync(authenticationDto.Email, authenticationDto.Password);
@@ -47,6 +47,18 @@ public class AuthenticationController : ControllerBase
             signingCredentials);
         var tokenToReturn = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
         return Ok(tokenToReturn);
+    }
+
+    [HttpPost("signUp")]
+    public async Task<ActionResult<UserToDisplayDto>> SignUp(UserForUpsertDto user)
+    {
+        if (await _userRepository.GetUserByEmailAsync(user.Email) != null)
+            return Conflict();
+        var storedUser = _mapper.Map<User>(user);
+        await _userRepository.AddAsync(storedUser);
+        await _unitOfWork.Commit();
+        return CreatedAtAction(nameof(UsersController.GetUserById), "Users", new { userId = storedUser.Id },
+            _mapper.Map<UserToDisplayDto>(storedUser));
     }
 
     private async Task<User?> ValidateUserCredentialsAsync(string email, string password)

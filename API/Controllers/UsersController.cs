@@ -30,18 +30,6 @@ public class UsersController : ControllerBase
         return Ok(_mapper.Map<UserToDisplayDto>(user));
     }
 
-    [HttpPost]
-    public async Task<ActionResult<UserToDisplayDto>> AddUser(UserForUpsertDto user)
-    {
-        if (await _userRepository.GetUserByEmailAsync(user.Email) != null)
-            return Conflict();
-        var storedUser = _mapper.Map<User>(user);
-        await _userRepository.AddAsync(storedUser);
-        await _unitOfWork.Commit();
-        return CreatedAtAction(nameof(GetUserById), new { userId = storedUser.Id },
-            _mapper.Map<UserToDisplayDto>(storedUser));
-    }
-
     [HttpPut("{userId:int}")]
     public async Task<ActionResult<UserToDisplayDto>> UpdateUser(int userId,
         UserForUpsertDto userToUpdate)
