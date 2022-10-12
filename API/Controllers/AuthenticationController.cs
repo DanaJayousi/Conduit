@@ -37,16 +37,16 @@ public class AuthenticationController : ControllerBase
         var securityKey =
             new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Authentication:SecretForKey"]));
         var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        var claimsForToken = new List<Claim> { new("sub", user.Id.ToString()) };
-        var jwtSecurityToken = new JwtSecurityToken(
+        var claimsForToken = new List<Claim> { new("userId", user.Id.ToString()) };
+        var accessToken = new JwtSecurityToken(
             _configuration["Authentication:Issuer"],
             _configuration["Authentication:Audience"],
             claimsForToken,
             DateTime.UtcNow,
-            DateTime.UtcNow.AddMinutes(10),
+            DateTime.UtcNow.AddMinutes(5),
             signingCredentials);
-        var tokenToReturn = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-        return Ok(tokenToReturn);
+        var accessTokenToReturn = new JwtSecurityTokenHandler().WriteToken(accessToken);
+        return Ok(accessTokenToReturn);
     }
 
     [HttpPost("signUp")]

@@ -2,6 +2,7 @@ using API.Models;
 using AutoMapper;
 using Domain.Interfaces;
 using Domain.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace API.Controllers;
 
 [Route("api/users")]
 [ApiController]
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IMapper _mapper;
@@ -34,6 +36,9 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<UserToDisplayDto>> UpdateUser(int userId,
         UserForUpsertDto userToUpdate)
     {
+        var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
+        if (loggedInUserId != userId.ToString()) return Forbid();
+
         var userFromDb = await _userRepository.GetAsync(userId);
         if (userFromDb == null)
             return NotFound();
@@ -49,6 +54,9 @@ public class UsersController : ControllerBase
     public async Task<ActionResult> PartiallyUpdateUser(int userId,
         JsonPatchDocument<UserForUpsertDto> patchDocument)
     {
+        var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
+        if (loggedInUserId != userId.ToString()) return Forbid();
+
         var userFromDb = await _userRepository.GetAsync(userId);
         if (userFromDb == null) return NotFound();
         var userToPatch = _mapper.Map<UserForUpsertDto>(
