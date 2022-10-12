@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using API.Services;
 using Domain.Article;
 using Domain.Comment;
 using Domain.Interfaces;
@@ -21,6 +22,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>

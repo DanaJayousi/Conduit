@@ -31,4 +31,10 @@ public class UserRepository : Repository<User>, IUserRepository
     {
         return await Context.Set<User>().Where(user => user.Email == email).SingleOrDefaultAsync();
     }
+    public async Task<User?> ValidateUserCredentialsAsync(string email, string password)
+    {
+        var user = await GetUserByEmailAsync(email);
+        if (user == null) return user;
+        return user.Password == password ? user : null;
+    }
 }

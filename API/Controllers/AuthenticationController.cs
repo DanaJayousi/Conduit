@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using API.Models;
+using API.Services;
 using AutoMapper;
 using Domain.Interfaces;
 using Domain.User;
@@ -15,37 +16,32 @@ namespace API.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly IConfiguration _configuration;
+    private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRepository _userRepository;
 
     public AuthenticationController(IUnitOfWork unitOfWork, IUserRepository userRepository, IMapper mapper,
-        IConfiguration configuration)
+        IConfiguration configuration, ITokenService tokenService)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
     }
 
     [HttpPost("signIn")]
     public async Task<ActionResult<string>> SignIn(
         AuthenticationDto authenticationDto)
     {
-        var user = await ValidateUserCredentialsAsync(authenticationDto.Email, authenticationDto.Password);
+        var user = await _userRepository.ValidateUserCredentialsAsync(authenticationDto.Email, authenticationDto.Password);
         if (user == null) return Unauthorized();
-        var securityKey =
-            new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Authentication:SecretForKey"]));
-        var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var claimsForToken = new List<Claim> { new("userId", user.Id.ToString()) };
-        var accessToken = new JwtSecurityToken(
+        var accessTokenToReturn = _tokenService.GenerateAccessToken(claimsForToken,
+            _configuration["Authentication:SecretForKey"],
             _configuration["Authentication:Issuer"],
-            _configuration["Authentication:Audience"],
-            claimsForToken,
-            DateTime.UtcNow,
-            DateTime.UtcNow.AddMinutes(5),
-            signingCredentials);
-        var accessTokenToReturn = new JwtSecurityTokenHandler().WriteToken(accessToken);
+            _configuration["Authentication:Audience"]);
         return Ok(accessTokenToReturn);
     }
 
@@ -59,12 +55,5 @@ public class AuthenticationController : ControllerBase
         await _unitOfWork.Commit();
         return CreatedAtAction(nameof(UsersController.GetUserById), "Users", new { userId = storedUser.Id },
             _mapper.Map<UserToDisplayDto>(storedUser));
-    }
-
-    private async Task<User?> ValidateUserCredentialsAsync(string email, string password)
-    {
-        var user = await _userRepository.GetUserByEmailAsync(email);
-        if (user == null) return user;
-        return user.Password == password ? user : null;
     }
 }
