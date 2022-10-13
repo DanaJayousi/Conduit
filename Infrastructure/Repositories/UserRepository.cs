@@ -10,21 +10,34 @@ public class UserRepository : Repository<User>, IUserRepository
     {
     }
 
-    public async Task FollowAsync(User user, User follower)
+    public void Follow(User user, User follower)
     {
-        await Context.Set<UserToUser>().AddAsync(new UserToUser
+        var link = new UserToUser
         {
             User = user,
             UserId = user.Id,
             Follower = follower,
             FollowerId = follower.Id
-        });
+        };
+        user.Followers.Add(link);
+        follower.Following.Add(link);
     }
 
     public void Unfollow(User user, User follower)
     {
         var link = follower.Following.SingleOrDefault(uTu => uTu.UserId == user.Id);
+        if (link == null) return;
+        follower.Following.Remove(link);
+        user.Followers.Remove(link);
         Context.Set<UserToUser>().Remove(link);
+    }
+
+    public Task<User?> GetUserWithFollowAsync(int userId)
+    {
+        return Context.Set<User>()
+            .Include(user => user.Followers)
+            .Include(user => user.Following)
+            .FirstOrDefaultAsync(user => user.Id == userId);
     }
 
     public async Task<User?> GetUserByEmailAsync(string email)

@@ -18,7 +18,7 @@ public class TokenService : ITokenService
             audience,
             claims,
             DateTime.UtcNow,
-            DateTime.UtcNow.AddMinutes(1),
+            DateTime.UtcNow.AddMinutes(5),
             signingCredentials);
         return new JwtSecurityTokenHandler().WriteToken(accessToken);
     }

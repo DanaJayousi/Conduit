@@ -27,7 +27,7 @@ public class UsersController : ControllerBase
     [HttpGet("{userId:int}")]
     public async Task<ActionResult<UserToDisplayDto>> GetUserById(int userId)
     {
-        var user = await _userRepository.GetAsync(userId);
+        var user = await _userRepository.GetUserWithFollowAsync(userId);
         if (user == null) return NotFound();
         return Ok(_mapper.Map<UserToDisplayDto>(user));
     }
@@ -67,5 +67,35 @@ public class UsersController : ControllerBase
         _mapper.Map(userToPatch, userFromDb);
         await _unitOfWork.Commit();
         return NoContent();
+    }
+
+    [HttpPost("{userId:int}/follow/{followingId:int}")]
+    public async Task<ActionResult> Follow(int userId, int followingId)
+    {
+        var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
+        if (loggedInUserId != userId.ToString()) return Forbid();
+        if (userId == followingId) return BadRequest();
+        var userFromDb = await _userRepository.GetAsync(userId);
+        if (userFromDb == null) return NotFound();
+        var followingFromDb = await _userRepository.GetAsync(followingId);
+        if (followingFromDb == null) return NotFound();
+        _userRepository.Follow(followingFromDb, userFromDb);
+        await _unitOfWork.Commit();
+        return Ok();
+    }
+
+    [HttpPost("{userId:int}/unfollow/{followingId:int}")]
+    public async Task<ActionResult> Unfollow(int userId, int followingId)
+    {
+        var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
+        if (loggedInUserId != userId.ToString()) return Forbid();
+        if (userId == followingId) return BadRequest();
+        var userFromDb = await _userRepository.GetUserWithFollowAsync(userId);
+        if (userFromDb == null) return NotFound();
+        var followingFromDb = await _userRepository.GetUserWithFollowAsync(followingId);
+        if (followingFromDb == null) return NotFound();
+        _userRepository.Unfollow(followingFromDb, userFromDb);
+        await _unitOfWork.Commit();
+        return Ok();
     }
 }
