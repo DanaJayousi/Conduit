@@ -41,4 +41,12 @@ public class ArticleRepository : Repository<Article>, IArticleRepository
                 favoriteArticle.UserId == user.Id && favoriteArticle.ArticleId == article.Id);
         Context.Set<FavoriteArticle>().Remove(link);
     }
+
+    public Task<Article?> GetArticleWithoutCommentsAsync(int articleId)
+    {
+        return Context.Set<Article>()
+            .Include(article => article.Author)
+            .Include(article => article.FavoriteArticle)
+            .FirstOrDefaultAsync(article => article.Id == articleId);
+    }
 }

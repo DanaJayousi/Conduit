@@ -10,11 +10,13 @@ using Infrastructure;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddFluentValidation(c => c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()))
-    .AddNewtonsoftJson();
+    .AddNewtonsoftJson(options =>
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 builder.Services.AddDbContext<ConduitDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration["ConnectionStrings:ConduitConnection"],
         sqlServerOptionsAction => sqlServerOptionsAction.MigrationsAssembly("Infrastructure")));
