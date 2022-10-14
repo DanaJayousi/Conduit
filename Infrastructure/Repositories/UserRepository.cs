@@ -12,6 +12,7 @@ public class UserRepository : Repository<User>, IUserRepository
 
     public void Follow(User user, User follower)
     {
+        if (follower.Following.SingleOrDefault(uTu => uTu.UserId == user.Id) != null) return;
         var link = new UserToUser
         {
             User = user,
@@ -20,7 +21,6 @@ public class UserRepository : Repository<User>, IUserRepository
             FollowerId = follower.Id
         };
         user.Followers.Add(link);
-        follower.Following.Add(link);
     }
 
     public void Unfollow(User user, User follower)
@@ -28,8 +28,6 @@ public class UserRepository : Repository<User>, IUserRepository
         var link = follower.Following.SingleOrDefault(uTu => uTu.UserId == user.Id);
         if (link == null) return;
         follower.Following.Remove(link);
-        user.Followers.Remove(link);
-        Context.Set<UserToUser>().Remove(link);
     }
 
     public Task<User?> GetUserWithFollowAsync(int userId)

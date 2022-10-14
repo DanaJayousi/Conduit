@@ -78,9 +78,9 @@ public class UsersController : ControllerBase
         var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
         if (loggedInUserId != userId.ToString()) return Forbid();
         if (userId == followingId) return BadRequest();
-        var userFromDb = await _userRepository.GetAsync(userId);
+        var userFromDb = await _userRepository.GetUserWithFollowAsync(userId);
         if (userFromDb == null) return NotFound();
-        var followingFromDb = await _userRepository.GetAsync(followingId);
+        var followingFromDb = await _userRepository.GetUserWithFollowAsync(followingId);
         if (followingFromDb == null) return NotFound();
         _userRepository.Follow(followingFromDb, userFromDb);
         await _unitOfWork.Commit();
