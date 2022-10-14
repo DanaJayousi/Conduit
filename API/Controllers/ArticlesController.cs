@@ -52,7 +52,7 @@ public class ArticlesController : ControllerBase
 
     [Authorize(Policy = "UsersOnly")]
     [HttpPut("{articleId:int}")]
-    public async Task<ActionResult<ArticleToDisplayDto>> UpdateArticle(int articleId,
+    public async Task<ActionResult> UpdateArticle(int articleId,
         ArticleToUpsertDto articleToUpsert)
     {
         var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
@@ -78,6 +78,34 @@ public class ArticlesController : ControllerBase
         if (article.Author.Id != int.Parse(loggedInUserId))
             return Forbid();
         _articleRepository.Remove(article);
+        await _unitOfWork.Commit();
+        return NoContent();
+    }
+
+    [Authorize(Policy = "UsersOnly")]
+    [HttpPost("{articleId:int}/favorite")]
+    public async Task<ActionResult> AddToFavorite(int articleId)
+    {
+        var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
+        var userFromDb = await _userRepository.GetUserWithArticlesAsync(int.Parse(loggedInUserId));
+        var article = await _articleRepository.GetArticleWithoutCommentsAsync(articleId);
+        if (article == null)
+            return NotFound();
+        _articleRepository.FavoriteArticle(userFromDb, article);
+        await _unitOfWork.Commit();
+        return NoContent();
+    }
+
+    [Authorize(Policy = "UsersOnly")]
+    [HttpDelete("{articleId:int}/favorite")]
+    public async Task<ActionResult> RemoveFromFavorite(int articleId)
+    {
+        var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
+        var userFromDb = await _userRepository.GetUserWithArticlesAsync(int.Parse(loggedInUserId));
+        var article = await _articleRepository.GetArticleWithoutCommentsAsync(articleId);
+        if (article == null)
+            return NotFound();
+        _articleRepository.UnFavoriteArticle(userFromDb, article);
         await _unitOfWork.Commit();
         return NoContent();
     }
