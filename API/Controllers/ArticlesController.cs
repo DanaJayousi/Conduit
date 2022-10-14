@@ -59,7 +59,7 @@ public class ArticlesController : ControllerBase
         var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
         var article = await _articleRepository.GetArticleWithoutCommentsAsync(articleId);
         if (article == null)
-            return NotFound();
+            return NotFound("Article Not Found");
         if (article.Author.Id != int.Parse(loggedInUserId))
             return Forbid();
         _mapper.Map(articleToUpsert, article);
@@ -75,7 +75,7 @@ public class ArticlesController : ControllerBase
         var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
         var article = await _articleRepository.GetArticleWithoutCommentsAsync(articleId);
         if (article == null)
-            return NotFound();
+            return NotFound("Article Not Found");
         if (article.Author.Id != int.Parse(loggedInUserId))
             return Forbid();
         _articleRepository.Remove(article);
@@ -91,7 +91,7 @@ public class ArticlesController : ControllerBase
         var userFromDb = await _userRepository.GetUserWithArticlesAsync(int.Parse(loggedInUserId));
         var article = await _articleRepository.GetArticleWithoutCommentsAsync(articleId);
         if (article == null)
-            return NotFound();
+            return NotFound("Article Not Found");
         _articleRepository.FavoriteArticle(userFromDb, article);
         await _unitOfWork.Commit();
         return NoContent();
@@ -105,7 +105,7 @@ public class ArticlesController : ControllerBase
         var userFromDb = await _userRepository.GetUserWithArticlesAsync(int.Parse(loggedInUserId));
         var article = await _articleRepository.GetArticleWithoutCommentsAsync(articleId);
         if (article == null)
-            return NotFound();
+            return NotFound("Article Not Found");
         _articleRepository.UnFavoriteArticle(userFromDb, article);
         await _unitOfWork.Commit();
         return NoContent();
@@ -113,7 +113,7 @@ public class ArticlesController : ControllerBase
 
     [Authorize(Policy = "UsersOnly")]
     [HttpGet]
-    public async Task<ActionResult<ArticleToDisplayDto>> GetFeed(int pageIndex = 0, int pageSize = 10)
+    public async Task<ActionResult<IEnumerable<ArticleToDisplayDto>>> GetFeed(int pageIndex = 0, int pageSize = 10)
     {
         pageSize = pageSize > MaxPageSize ? MaxPageSize : pageSize;
         var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;

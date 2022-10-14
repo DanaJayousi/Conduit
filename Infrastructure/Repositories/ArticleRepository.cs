@@ -44,9 +44,9 @@ public class ArticleRepository : Repository<Article>, IArticleRepository
         user.FavoriteArticles.Remove(link);
     }
 
-    public Task<Article?> GetArticleWithoutCommentsAsync(int articleId)
+    public async Task<Article?> GetArticleWithoutCommentsAsync(int articleId)
     {
-        return Context.Set<Article>()
+        return await Context.Set<Article>()
             .Include(article => article.Author)
             .Include(article => article.FavoriteArticle)
             .FirstOrDefaultAsync(article => article.Id == articleId);
