@@ -12,6 +12,7 @@ namespace API.Controllers;
 [ApiController]
 public class ArticlesController : ControllerBase
 {
+    private const int MaxPageSize = 15;
     private readonly IArticleRepository _articleRepository;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
@@ -108,5 +109,16 @@ public class ArticlesController : ControllerBase
         _articleRepository.UnFavoriteArticle(userFromDb, article);
         await _unitOfWork.Commit();
         return NoContent();
+    }
+
+    [Authorize(Policy = "UsersOnly")]
+    [HttpGet]
+    public async Task<ActionResult<ArticleToDisplayDto>> GetFeed(int pageIndex = 0, int pageSize = 10)
+    {
+        pageSize = pageSize > MaxPageSize ? MaxPageSize : pageSize;
+        var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
+        var userFromDb = await _userRepository.GetUserWithFollowAsync(int.Parse(loggedInUserId));
+        var articles = await _articleRepository.GetFeedAsync(userFromDb, pageIndex, pageSize);
+        return Ok(_mapper.Map<IEnumerable<ArticleToDisplayDto>>(articles));
     }
 }

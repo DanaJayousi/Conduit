@@ -11,12 +11,13 @@ public class ArticleRepository : Repository<Article>, IArticleRepository
     {
     }
 
-    public async Task<IEnumerable<Article>> GetFeedAsync(int userId, int pageIndex, int pageSize)
+    public async Task<IEnumerable<Article>> GetFeedAsync(User currentUser, int pageIndex, int pageSize)
     {
-        var currentUser = await Context.Set<User>().FindAsync(userId);
         var currentUserFollowing = currentUser.Following.Select(userToUser => userToUser.UserId).ToList();
         return await Context.Set<Article>()
             .Where(article => currentUserFollowing.Contains(article.Author.Id))
+            .Include(article => article.Author)
+            .Include(article => article.FavoriteArticle)
             .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
             .OrderByDescending(article => article.LastUpdated)

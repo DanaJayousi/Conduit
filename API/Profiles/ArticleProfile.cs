@@ -14,7 +14,9 @@ public class ArticleProfile : Profile
             .ForMember(dto => dto.PublishDate,
                 opt => opt.MapFrom(article => article.PublishDate.ToShortDateString()))
             .ForMember(dto => dto.LastUpdated,
-                opt => opt.MapFrom(article => article.LastUpdated.ToShortDateString()));
+                opt => opt.MapFrom(article => article.LastUpdated.ToShortDateString()))
+            .ForMember(dto => dto.FavoritedCount,
+                opt => opt.MapFrom(article => article.FavoriteArticle.Count));
         CreateMap<ArticleToUpsertDto, Article>();
     }
 }
