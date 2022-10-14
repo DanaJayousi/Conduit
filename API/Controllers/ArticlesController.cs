@@ -63,7 +63,7 @@ public class ArticlesController : ControllerBase
         if (article.Author.Id != int.Parse(loggedInUserId))
             return Forbid();
         _mapper.Map(articleToUpsert, article);
-        article.LastUpdated = DateTime.UtcNow.AddDays(5);
+        article.LastUpdated = DateTime.UtcNow;
         await _unitOfWork.Commit();
         return NoContent();
     }
