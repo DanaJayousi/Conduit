@@ -84,7 +84,7 @@ public class UsersController : ControllerBase
         if (followingFromDb == null) return NotFound();
         _userRepository.Follow(followingFromDb, userFromDb);
         await _unitOfWork.Commit();
-        return Ok();
+        return NoContent();
     }
 
     [HttpDelete("{userId:int}/follow/{followingId:int}")]
@@ -99,6 +99,6 @@ public class UsersController : ControllerBase
         if (followingFromDb == null) return NotFound();
         _userRepository.Unfollow(followingFromDb, userFromDb);
         await _unitOfWork.Commit();
-        return Ok();
+        return NoContent();
     }
 }
