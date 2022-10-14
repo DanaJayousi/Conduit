@@ -1,5 +1,4 @@
 ﻿using Domain.Article;
-using Domain.Comment;
 using Domain.Interfaces;
 using Domain.User;
 using Infrastructure.Repositories;
@@ -14,12 +13,10 @@ public class UnitOfWork : IUnitOfWork
     {
         _context = context;
         _articleRepository = new ArticleRepository(_context);
-        _commentRepository = new CommentRepository(_context);
         _userRepository = new UserRepository(_context);
     }
 
     public IArticleRepository _articleRepository { get; set; }
-    public ICommentRepository _commentRepository { get; set; }
     public IUserRepository _userRepository { get; set; }
 
     public async Task<bool> Commit()
