@@ -84,7 +84,7 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("{userId:int}/unfollow/{followingId:int}")]
+    [HttpDelete("{userId:int}/follow/{followingId:int}")]
     public async Task<ActionResult> Unfollow(int userId, int followingId)
     {
         var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
