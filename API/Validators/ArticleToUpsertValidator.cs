@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace API.Validators;
 
-public class ArticleToDisplayValidator : AbstractValidator<ArticleToUpsertDto>
+public class ArticleToUpsertValidator : AbstractValidator<ArticleToUpsertDto>
 {
-    public ArticleToDisplayValidator()
+    public ArticleToUpsertValidator()
     {
         RuleFor(article => article.Title)
             .NotEmpty()
