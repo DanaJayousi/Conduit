@@ -7,7 +7,6 @@ using Domain.Interfaces;
 using Domain.User;
 using Domain.UserToUser;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UnitTests;
@@ -85,12 +84,12 @@ public class UsersControllerTests
         _contextMock.Setup(ctx => ctx.User)
             .Returns(_userMock.Object);
 
-        var result = await _sut.UpdateUser(userId+1, new UserForUpsertDto());
+        var result = await _sut.UpdateUser(userId + 1, new UserForUpsertDto());
 
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<ForbidResult>();
     }
-    
+
     [Fact]
     public async Task UpdateUser_ShouldReturnNotFound_WhenUserDoesNotExist()
     {
@@ -108,12 +107,12 @@ public class UsersControllerTests
             .ReturnsAsync(() => null);
 
         var result = await _sut.UpdateUser(userId, new UserForUpsertDto());
-        
+
         _userRepositoryMock.Verify(repository => repository.GetAsync(It.IsAny<int>()), Times.Once);
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<NotFoundResult>();
     }
-    
+
     [Fact]
     public async Task UpdateUser_ShouldReturnConflict_WhenUserUsesAnAlreadyUsedEmail()
     {
@@ -137,16 +136,16 @@ public class UsersControllerTests
         _userRepositoryMock.Setup(repository => repository.GetAsync(It.IsAny<int>()))
             .ReturnsAsync(new User());
         _userRepositoryMock.Setup(repository => repository.GetUserByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync(new User {Id = userId+1});
+            .ReturnsAsync(new User { Id = userId + 1 });
 
         var result = await _sut.UpdateUser(userId, userToUpdate);
-        
+
         _userRepositoryMock.Verify(repository => repository.GetUserByEmailAsync(It.IsAny<string>()), Times.Once);
         _userRepositoryMock.Verify(repository => repository.GetAsync(It.IsAny<int>()), Times.Once);
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<ConflictResult>();
     }
-    
+
     [Fact]
     public async Task UpdateUser_ShouldReturnNoContent_WhenThereIsNoEmailConflict()
     {
@@ -170,19 +169,19 @@ public class UsersControllerTests
         _userRepositoryMock.Setup(repository => repository.GetAsync(It.IsAny<int>()))
             .ReturnsAsync(new User());
         _userRepositoryMock.Setup(repository => repository.GetUserByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync(()=> null);
+            .ReturnsAsync(() => null);
         _unitOfWorkMock.Setup(work => work.Commit())
             .ReturnsAsync(true);
-        
+
         var result = await _sut.UpdateUser(userId, userToUpdate);
-        
+
         _unitOfWorkMock.Verify(work => work.Commit(), Times.Once);
         _userRepositoryMock.Verify(repository => repository.GetUserByEmailAsync(It.IsAny<string>()), Times.Once);
         _userRepositoryMock.Verify(repository => repository.GetAsync(It.IsAny<int>()), Times.Once);
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<NoContentResult>();
     }
-    
+
     [Fact]
     public async Task UpdateUser_ShouldReturnNoContent_WhenThereIsNoEmailChange()
     {
@@ -206,19 +205,19 @@ public class UsersControllerTests
         _userRepositoryMock.Setup(repository => repository.GetAsync(It.IsAny<int>()))
             .ReturnsAsync(new User());
         _userRepositoryMock.Setup(repository => repository.GetUserByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync(new User{Id = userId});
+            .ReturnsAsync(new User { Id = userId });
         _unitOfWorkMock.Setup(work => work.Commit())
             .ReturnsAsync(true);
-        
+
         var result = await _sut.UpdateUser(userId, userToUpdate);
-        
+
         _unitOfWorkMock.Verify(work => work.Commit(), Times.Once);
         _userRepositoryMock.Verify(repository => repository.GetUserByEmailAsync(It.IsAny<string>()), Times.Once);
         _userRepositoryMock.Verify(repository => repository.GetAsync(It.IsAny<int>()), Times.Once);
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<NoContentResult>();
     }
-    
+
     [Fact]
     public async Task Follow_ShouldReturnForbid_WhenCurrentUserIsNotTheFollower()
     {
@@ -233,12 +232,12 @@ public class UsersControllerTests
         _contextMock.Setup(ctx => ctx.User)
             .Returns(_userMock.Object);
 
-        var result = await _sut.Follow(userId+1, userId+2);
-        
+        var result = await _sut.Follow(userId + 1, userId + 2);
+
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<ForbidResult>();
     }
-    
+
     [Fact]
     public async Task Follow_ShouldReturnBadRequest_WhenTheFollowerIsTheFollowing()
     {
@@ -254,11 +253,11 @@ public class UsersControllerTests
             .Returns(_userMock.Object);
 
         var result = await _sut.Follow(userId, userId);
-        
+
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<BadRequestResult>();
     }
-    
+
     [Fact]
     public async Task Follow_ShouldReturnNotFound_WhenTheFollowerDoesNotExist()
     {
@@ -273,15 +272,15 @@ public class UsersControllerTests
         _contextMock.Setup(ctx => ctx.User)
             .Returns(_userMock.Object);
         _userRepositoryMock.Setup(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()))
-            .ReturnsAsync(()=>null);
+            .ReturnsAsync(() => null);
 
-        var result = await _sut.Follow(userId, userId+1);
-        
+        var result = await _sut.Follow(userId, userId + 1);
+
         _userRepositoryMock.Verify(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()), Times.Once);
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<NotFoundResult>();
     }
-    
+
     [Fact]
     public async Task Follow_ShouldReturnNotFound_WhenTheFollowingDoesNotExist()
     {
@@ -296,16 +295,16 @@ public class UsersControllerTests
         _contextMock.Setup(ctx => ctx.User)
             .Returns(_userMock.Object);
         _userRepositoryMock.SetupSequence(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()))
-            .ReturnsAsync(new User{Id = userId})
-            .ReturnsAsync(()=>null);
+            .ReturnsAsync(new User { Id = userId })
+            .ReturnsAsync(() => null);
 
-        var result = await _sut.Follow(userId, userId+1);
-        
+        var result = await _sut.Follow(userId, userId + 1);
+
         _userRepositoryMock.Verify(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()), Times.Exactly(2));
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<NotFoundResult>();
     }
-    
+
     [Fact]
     public async Task Follow_ShouldReturnNoContent_WhenFollowSucceeds()
     {
@@ -321,11 +320,11 @@ public class UsersControllerTests
         _contextMock.Setup(ctx => ctx.User)
             .Returns(_userMock.Object);
         _userRepositoryMock.SetupSequence(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()))
-            .ReturnsAsync(new User{Id = userId})
-            .ReturnsAsync(new User{Id = userId+1});
+            .ReturnsAsync(new User { Id = userId })
+            .ReturnsAsync(new User { Id = userId + 1 });
         _userRepositoryMock.Setup(repository => repository.Follow(It.IsAny<User>(), It.IsAny<User>()))
-            .Callback<User,User>((user,follower)=>
-                link = new UserToUser()
+            .Callback<User, User>((user, follower) =>
+                link = new UserToUser
                 {
                     User = user,
                     UserId = user.Id,
@@ -333,17 +332,17 @@ public class UsersControllerTests
                     FollowerId = follower.Id
                 });
 
-        var result = await _sut.Follow(userId, userId+1);
-        
+        var result = await _sut.Follow(userId, userId + 1);
+
         _unitOfWorkMock.Verify(work => work.Commit(), Times.Once);
-        _userRepositoryMock.Verify(repository => repository.Follow(It.IsAny<User>(), It.IsAny<User>()),Times.Once);
+        _userRepositoryMock.Verify(repository => repository.Follow(It.IsAny<User>(), It.IsAny<User>()), Times.Once);
         _userRepositoryMock.Verify(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()), Times.Exactly(2));
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<NoContentResult>();
-        link.UserId.Should().Be(userId+1);
+        link.UserId.Should().Be(userId + 1);
         link.FollowerId.Should().Be(userId);
     }
-    
+
     [Fact]
     public async Task Unfollow_ShouldReturnForbid_WhenCurrentUserIsNotTheUnfollower()
     {
@@ -358,12 +357,12 @@ public class UsersControllerTests
         _contextMock.Setup(ctx => ctx.User)
             .Returns(_userMock.Object);
 
-        var result = await _sut.Unfollow(userId+1, userId+2);
-        
+        var result = await _sut.Unfollow(userId + 1, userId + 2);
+
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<ForbidResult>();
     }
-    
+
     [Fact]
     public async Task Unfollow_ShouldReturnBadRequest_WhenTheUnfollowerIsTheUnfollowed()
     {
@@ -379,11 +378,11 @@ public class UsersControllerTests
             .Returns(_userMock.Object);
 
         var result = await _sut.Unfollow(userId, userId);
-        
+
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<BadRequestResult>();
     }
-    
+
     [Fact]
     public async Task Unfollow_ShouldReturnNotFound_WhenTheUnfollowerDoesNotExist()
     {
@@ -398,15 +397,15 @@ public class UsersControllerTests
         _contextMock.Setup(ctx => ctx.User)
             .Returns(_userMock.Object);
         _userRepositoryMock.Setup(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()))
-            .ReturnsAsync(()=>null);
+            .ReturnsAsync(() => null);
 
-        var result = await _sut.Unfollow(userId, userId+1);
-        
+        var result = await _sut.Unfollow(userId, userId + 1);
+
         _userRepositoryMock.Verify(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()), Times.Once);
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<NotFoundResult>();
     }
-    
+
     [Fact]
     public async Task Unfollow_ShouldReturnNotFound_WhenTheUnfollowedDoesNotExist()
     {
@@ -421,16 +420,16 @@ public class UsersControllerTests
         _contextMock.Setup(ctx => ctx.User)
             .Returns(_userMock.Object);
         _userRepositoryMock.SetupSequence(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()))
-            .ReturnsAsync(new User{Id = userId})
-            .ReturnsAsync(()=>null);
+            .ReturnsAsync(new User { Id = userId })
+            .ReturnsAsync(() => null);
 
-        var result = await _sut.Unfollow(userId, userId+1);
-        
+        var result = await _sut.Unfollow(userId, userId + 1);
+
         _userRepositoryMock.Verify(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()), Times.Exactly(2));
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<NotFoundResult>();
     }
-    
+
     [Fact]
     public async Task Unfollow_ShouldReturnNoContent_WhenUnfollowSucceeds()
     {
@@ -446,11 +445,11 @@ public class UsersControllerTests
         _contextMock.Setup(ctx => ctx.User)
             .Returns(_userMock.Object);
         _userRepositoryMock.SetupSequence(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()))
-            .ReturnsAsync(new User{Id = userId})
-            .ReturnsAsync(new User{Id = userId+1});
+            .ReturnsAsync(new User { Id = userId })
+            .ReturnsAsync(new User { Id = userId + 1 });
         _userRepositoryMock.Setup(repository => repository.Unfollow(It.IsAny<User>(), It.IsAny<User>()))
-            .Callback<User,User>((user,follower)=>
-                link = new UserToUser()
+            .Callback<User, User>((user, follower) =>
+                link = new UserToUser
                 {
                     User = user,
                     UserId = user.Id,
@@ -458,15 +457,14 @@ public class UsersControllerTests
                     FollowerId = follower.Id
                 });
 
-        var result = await _sut.Unfollow(userId, userId+1);
-        
+        var result = await _sut.Unfollow(userId, userId + 1);
+
         _unitOfWorkMock.Verify(work => work.Commit(), Times.Once);
-        _userRepositoryMock.Verify(repository => repository.Unfollow(It.IsAny<User>(), It.IsAny<User>()),Times.Once);
+        _userRepositoryMock.Verify(repository => repository.Unfollow(It.IsAny<User>(), It.IsAny<User>()), Times.Once);
         _userRepositoryMock.Verify(repository => repository.GetUserWithFollowAsync(It.IsAny<int>()), Times.Exactly(2));
         _userMock.VerifyGet(p => p.Claims, Times.Once);
         result.Should().BeOfType<NoContentResult>();
-        link.UserId.Should().Be(userId+1);
+        link.UserId.Should().Be(userId + 1);
         link.FollowerId.Should().Be(userId);
     }
-
 }
