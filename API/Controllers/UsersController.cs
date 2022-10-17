@@ -32,8 +32,9 @@ public class UsersController : ControllerBase
         return Ok(_mapper.Map<UserToDisplayDto>(user));
     }
 
+    [Authorize(Policy = "UsersOnly")]
     [HttpPut("{userId:int}")]
-    public async Task<ActionResult<UserToDisplayDto>> UpdateUser(int userId,
+    public async Task<ActionResult> UpdateUser(int userId,
         UserForUpsertDto userToUpdate)
     {
         var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
@@ -50,6 +51,7 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = "UsersOnly")]
     [HttpPatch("{userId:int}")]
     public async Task<ActionResult> PartiallyUpdateUser(int userId,
         JsonPatchDocument<UserForUpsertDto> patchDocument)
@@ -69,6 +71,7 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = "UsersOnly")]
     [HttpPost("{userId:int}/follow/{followingId:int}")]
     public async Task<ActionResult> Follow(int userId, int followingId)
     {
@@ -84,6 +87,7 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = "UsersOnly")]
     [HttpDelete("{userId:int}/follow/{followingId:int}")]
     public async Task<ActionResult> Unfollow(int userId, int followingId)
     {
