@@ -70,7 +70,7 @@ public class UserForUpsertValidatorTests
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void RuleForFirstName_WhenFirstNameIsNull(string firstName)
+    public void RuleForFirstName_WhenFirstNameIsNullOrEmpty(string firstName)
     {
         var userForUpsertDto = new UserForUpsertDto
         {
