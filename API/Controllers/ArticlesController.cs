@@ -113,9 +113,11 @@ public class ArticlesController : ControllerBase
 
     [Authorize(Policy = "UsersOnly")]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ArticleToDisplayDto>>> GetFeed(int pageIndex = 0, int pageSize = 10)
+    public async Task<ActionResult<IEnumerable<ArticleToDisplayDto>>> GetFeed(int pageIndex = 1, int pageSize = 10)
     {
         pageSize = pageSize > MaxPageSize ? MaxPageSize : pageSize;
+        pageSize = pageSize > 0 ? pageSize : 1;
+        pageIndex = pageIndex > 0 ? pageIndex : 1;
         var loggedInUserId = User.Claims.FirstOrDefault(claim => claim.Type == "userId")?.Value;
         var userFromDb = await _userRepository.GetUserWithFollowAsync(int.Parse(loggedInUserId));
         var articles = await _articleRepository.GetFeedAsync(userFromDb, pageIndex, pageSize);
