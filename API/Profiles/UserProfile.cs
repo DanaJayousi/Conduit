@@ -8,9 +8,9 @@ public class UserProfile : Profile
 {
     public UserProfile()
     {
-        CreateMap<UserForUpsertDto, User>();
-        CreateMap<User, UserForUpsertDto>();
-        CreateMap<User, UserToDisplayDto>()
+        CreateMap<UserForUpsertDto, User>(MemberList.Source);
+        CreateMap<User, UserForUpsertDto>(MemberList.Destination);
+        CreateMap<User, UserToDisplayDto>(MemberList.Destination)
             .ForMember(dest => dest.Name,
                 opt => opt.MapFrom(src => src.FullName))
             .ForMember(dest => dest.FollowingCount,
