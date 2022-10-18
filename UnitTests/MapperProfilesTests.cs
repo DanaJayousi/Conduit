@@ -15,4 +15,15 @@ public class MapperProfilesTests
 
         mapper.ConfigurationProvider.AssertConfigurationIsValid();
     }
+
+    [Fact]
+    public void ValidateArticleProfile()
+    {
+        var mapperConfig = new MapperConfiguration(
+            cfg => { cfg.AddProfile(new ArticleProfile()); });
+
+        IMapper mapper = new Mapper(mapperConfig);
+
+        mapper.ConfigurationProvider.AssertConfigurationIsValid();
+    }
 }

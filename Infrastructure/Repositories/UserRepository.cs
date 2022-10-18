@@ -38,6 +38,13 @@ public class UserRepository : Repository<User>, IUserRepository
             .FirstOrDefaultAsync(user => user.Id == userId);
     }
 
+    public Task<User?> GetUserWithArticlesAsync(int userId)
+    {
+        return Context.Set<User>()
+            .Include(user => user.Articles)
+            .FirstOrDefaultAsync(user => user.Id == userId);
+    }
+
     public async Task<User?> GetUserByEmailAsync(string email)
     {
         return await Context.Set<User>().Where(user => user.Email == email).SingleOrDefaultAsync();
