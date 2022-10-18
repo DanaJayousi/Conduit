@@ -88,7 +88,7 @@ public class AuthenticationController : ControllerBase
         return Ok(new Token
         {
             accessToken = newAccessToken,
-            refreshToken = refreshToken
+            refreshToken = newRefreshToken
         });
     }
 
