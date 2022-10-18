@@ -26,4 +26,14 @@ public class MapperProfilesTests
 
         mapper.ConfigurationProvider.AssertConfigurationIsValid();
     }
+    [Fact]
+    public void ValidateCommentProfile()
+    {
+        var mapperConfig = new MapperConfiguration(
+            cfg => { cfg.AddProfile(new CommentProfile()); });
+
+        IMapper mapper = new Mapper(mapperConfig);
+
+        mapper.ConfigurationProvider.AssertConfigurationIsValid();
+    }
 }
