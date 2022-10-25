@@ -33,6 +33,7 @@ public class AuthenticationController : ControllerBase
     public async Task<ActionResult<Token>> SignIn(
         AuthenticationDto authenticationDto)
     {
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(authenticationDto.Password);
         var user = await _userRepository.ValidateUserCredentialsAsync(authenticationDto.Email,
             authenticationDto.Password);
         if (user == null) return Unauthorized();
@@ -57,6 +58,8 @@ public class AuthenticationController : ControllerBase
     {
         if (await _userRepository.GetUserByEmailAsync(user.Email) != null)
             return Conflict();
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
+        user.Password = hashedPassword;
         var storedUser = _mapper.Map<User>(user);
         await _userRepository.AddAsync(storedUser);
         await _unitOfWork.Commit();

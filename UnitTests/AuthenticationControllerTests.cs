@@ -180,7 +180,8 @@ public class AuthenticationControllerTests
     {
         var userForUpsertDto = new UserForUpsertDto
         {
-            Email = "email@used"
+            Email = "email@used",
+            Password = "some password"
         };
         User addedUser = null;
         string email = null;
