@@ -35,7 +35,7 @@ public class AuthenticationController : ControllerBase
     {
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(authenticationDto.Password);
         var user = await _userRepository.ValidateUserCredentialsAsync(authenticationDto.Email,
-            authenticationDto.Password);
+            hashedPassword);
         if (user == null) return Unauthorized();
         var claimsForToken = new List<Claim> { new("userId", user.Id.ToString()) };
         var accessTokenToReturn = _tokenService.GenerateAccessToken(claimsForToken,
