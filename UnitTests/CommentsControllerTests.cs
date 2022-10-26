@@ -152,6 +152,40 @@ public class CommentsControllerTests
         {
             Id = 5
         };
+        var claim = new Claim("userId", user.Id.ToString());
+        var claims = new List<Claim>
+        {
+            claim
+        };
+        var commentToInsert = new CommentToInsertDto
+        {
+            content = "content"
+        };
+        _userMock.SetupGet(p => p.Claims)
+            .Returns(claims);
+        _contextMock.Setup(ctx => ctx.User)
+            .Returns(_userMock.Object);
+        _userRepositoryMock.Setup(repository => repository.GetUserWithArticlesAsync(It.IsAny<int>()))
+            .ReturnsAsync(user);
+        _articleRepositoryMock.Setup(repository => repository.GetArticleWithCommentsAsync(It.IsAny<int>()))
+            .ReturnsAsync(() => null);
+
+        var result = await _sut.AddComment(5, commentToInsert);
+
+        _userRepositoryMock.Verify(repository => repository.GetUserWithArticlesAsync(It.IsAny<int>()), Times.Once);
+        _articleRepositoryMock.Verify(repository => repository.GetArticleWithCommentsAsync(It.IsAny<int>()),
+            Times.Once);
+        _userMock.VerifyGet(p => p.Claims, Times.Once);
+        result.Result.Should().BeOfType<NotFoundObjectResult>();
+    }
+
+    [Fact]
+    public async Task AddComment_ReturnsTheComment()
+    {
+        var user = new User
+        {
+            Id = 5
+        };
         var article = new Article
         {
             Id = 10
