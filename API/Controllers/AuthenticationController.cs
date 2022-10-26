@@ -33,10 +33,10 @@ public class AuthenticationController : ControllerBase
     public async Task<ActionResult<Token>> SignIn(
         AuthenticationDto authenticationDto)
     {
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(authenticationDto.Password);
-        var user = await _userRepository.ValidateUserCredentialsAsync(authenticationDto.Email,
-            hashedPassword);
+        var user = await _userRepository.GetUserByEmailAsync(authenticationDto.Email);
         if (user == null) return Unauthorized();
+        if (!BCrypt.Net.BCrypt.Verify(authenticationDto.Password, user.Password))
+            return Unauthorized();
         var claimsForToken = new List<Claim> { new("userId", user.Id.ToString()) };
         var accessTokenToReturn = _tokenService.GenerateAccessToken(claimsForToken,
             _configuration["Authentication:SecretForKey"],
