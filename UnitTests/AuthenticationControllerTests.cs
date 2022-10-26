@@ -63,7 +63,7 @@ public class AuthenticationControllerTests
         var result = await _sut.SignIn(authenticationDto);
 
         _userRepositoryMock.Verify(
-            repository => repository.ValidateUserCredentialsAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            repository => repository.GetUserByEmailAsync(It.IsAny<string>()), Times.Once);
         result.Result.Should().BeOfType<UnauthorizedResult>();
     }
 
@@ -77,7 +77,7 @@ public class AuthenticationControllerTests
         };
         var user = new User
         {
-            Password = "notTheSamePassword"
+            Password = BCrypt.Net.BCrypt.HashPassword("notTheSamePassword")
         };
         string emailString = null;
         _userRepositoryMock.Setup(repository => repository.GetUserByEmailAsync(It.IsAny<string>()))
@@ -87,9 +87,9 @@ public class AuthenticationControllerTests
         var result = await _sut.SignIn(authenticationDto);
 
         _userRepositoryMock.Verify(
-            repository => repository.ValidateUserCredentialsAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            repository => repository.GetUserByEmailAsync(It.IsAny<string>()), Times.Once);
         result.Result.Should().BeOfType<UnauthorizedResult>();
-        emailString.Should().BeEquivalentTo(user.Email);
+        emailString.Should().BeEquivalentTo(authenticationDto.Email);
     }
 
     [Fact]
@@ -104,7 +104,7 @@ public class AuthenticationControllerTests
         {
             Id = 1,
             Email = "email@email",
-            Password = "password"
+            Password = BCrypt.Net.BCrypt.HashPassword("password")
         };
         var claimsForToken = new List<Claim> { new("userId", user.Id.ToString()) };
         List<Claim> addedClaims = null;
@@ -118,7 +118,7 @@ public class AuthenticationControllerTests
         };
         var expDate = new DateTime();
         _userRepositoryMock.Setup(repository =>
-                repository.ValidateUserCredentialsAsync(It.IsAny<string>(), It.IsAny<string>()))
+                repository.GetUserByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync(user);
         _tokenServiceMock.Setup(service => service.GenerateAccessToken(It.IsAny<List<Claim>>(), It.IsAny<string>()
                 , It.IsAny<string>(), It.IsAny<string>()))
@@ -144,7 +144,7 @@ public class AuthenticationControllerTests
             , It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         _tokenServiceMock.Verify(service => service.GenerateRefreshToken(), Times.Once);
         _userRepositoryMock.Verify(repository =>
-                repository.ValidateUserCredentialsAsync(It.IsAny<string>(), It.IsAny<string>()),
+                repository.GetUserByEmailAsync(It.IsAny<string>()),
             Times.Once);
         result.Result.Should().BeOfType<OkObjectResult>();
         ((ObjectResult)result.Result).Value.Should().BeEquivalentTo(token);

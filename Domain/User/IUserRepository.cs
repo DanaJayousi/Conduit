@@ -9,5 +9,4 @@ public interface IUserRepository : IRepository<User>
     Task<User?> GetUserWithFollowAsync(int userId);
     Task<User?> GetUserWithArticlesAsync(int userId);
     Task<User?> GetUserByEmailAsync(string email);
-    Task<User?> ValidateUserCredentialsAsync(string email, string password);
 }
