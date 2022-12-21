@@ -4,6 +4,8 @@ namespace Domain.User;
 
 public interface IUserRepository : IRepository<User>
 {
-    Task FollowAsync(User user, User follower);
+    void Follow(User user, User follower);
     void Unfollow(User user, User follower);
+    Task<User?> GetUserWithFollowAsync(int userId);
+    Task<User?> GetUserByEmailAsync(string email);
 }

@@ -22,7 +22,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         return await Context.Set<TEntity>().ToListAsync();
     }
 
-    public async Task Add(TEntity entity)
+    public async Task AddAsync(TEntity entity)
     {
         await Context.Set<TEntity>().AddAsync(entity);
     }

@@ -7,7 +7,9 @@ public class User
     public string Password { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
-    public string FullName => $"{FirstName}{LastName}";
+    public string FullName => $"{FirstName} {LastName}";
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
     public List<Article.Article> Articles { get; set; } = new();
     public List<UserToUser.UserToUser> Following { get; set; } = new();
     public List<UserToUser.UserToUser> Followers { get; set; } = new();
