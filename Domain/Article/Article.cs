@@ -9,7 +9,5 @@ public class Article
     public DateTime LastUpdated { get; set; }
     public string Content { get; set; }
     public List<Comment.Comment> Comments { get; set; } = new();
-
-    public int FavoritedCount => FavoriteArticle.Count();
     public List<FavoriteArticle.FavoriteArticle> FavoriteArticle { get; set; } = new();
 }

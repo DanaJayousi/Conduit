@@ -11,12 +11,13 @@ public class ArticleRepository : Repository<Article>, IArticleRepository
     {
     }
 
-    public async Task<IEnumerable<Article>> GetFeedAsync(int userId, int pageIndex, int pageSize)
+    public async Task<IEnumerable<Article>> GetFeedAsync(User currentUser, int pageIndex, int pageSize)
     {
-        var currentUser = await Context.Set<User>().FindAsync(userId);
         var currentUserFollowing = currentUser.Following.Select(userToUser => userToUser.UserId).ToList();
         return await Context.Set<Article>()
             .Where(article => currentUserFollowing.Contains(article.Author.Id))
+            .Include(article => article.Author)
+            .Include(article => article.FavoriteArticle)
             .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
             .OrderByDescending(article => article.LastUpdated)
@@ -25,20 +26,29 @@ public class ArticleRepository : Repository<Article>, IArticleRepository
 
     public void FavoriteArticle(User user, Article article)
     {
-        user.FavoriteArticles.Add(new FavoriteArticle
+        if (user.FavoriteArticles.SingleOrDefault(favArticle => favArticle.ArticleId == article.Id) != null) return;
+        var link = new FavoriteArticle
         {
             User = user,
             UserId = user.Id,
             Article = article,
             ArticleId = article.Id
-        });
+        };
+        user.FavoriteArticles.Add(link);
     }
 
     public void UnFavoriteArticle(User user, Article article)
     {
-        var link = Context.Set<FavoriteArticle>()
-            .SingleOrDefault(favoriteArticle =>
-                favoriteArticle.UserId == user.Id && favoriteArticle.ArticleId == article.Id);
-        Context.Set<FavoriteArticle>().Remove(link);
+        var link = user.FavoriteArticles.SingleOrDefault(favArticle => favArticle.ArticleId == article.Id);
+        if (link == null) return;
+        user.FavoriteArticles.Remove(link);
+    }
+
+    public async Task<Article?> GetArticleWithoutCommentsAsync(int articleId)
+    {
+        return await Context.Set<Article>()
+            .Include(article => article.Author)
+            .Include(article => article.FavoriteArticle)
+            .FirstOrDefaultAsync(article => article.Id == articleId);
     }
 }
